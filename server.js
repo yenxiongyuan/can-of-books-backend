@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const Book = require('./models/book');
 mongoose.connect(process.env.DB_URL);
 
 const db = mongoose.connection;
@@ -19,8 +20,21 @@ const PORT = process.env.PORT || 3001;
 
 app.get('/test', (request, response) => {
 
-  response.send('test request received')
+  response.send('test request received');
 
-})
+});
+
+app.get('/books', getBooks);
+
+async function getBooks(request, response, next) {
+  try {
+    let allBooks = await Book.find({});
+
+    response.status(200).send(allBooks);
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+}
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
