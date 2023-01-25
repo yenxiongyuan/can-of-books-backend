@@ -14,9 +14,13 @@ db.once('open', function () {
 });
 
 const app = express();
+
+// middleware
 app.use(cors());
 
-const PORT = process.env.PORT || 3001;
+app.use(express.json());
+
+const PORT = process.env.PORT || 3002;
 
 app.get('/test', (request, response) => {
 
@@ -25,6 +29,32 @@ app.get('/test', (request, response) => {
 });
 
 app.get('/books', getBooks);
+
+app.delete('/books/:bookID', deleteBooks);
+
+app.post('/books', postBooks);
+
+async function postBooks(request, response, next) {
+  try {
+    let createdBook = await Book.create(request.body);
+    response.status(200).send(createdBook);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteBooks(request, response, next) {
+  console.log('inside of delete books function...serverside');
+  try {
+    let id = request.params.bookID;
+    console.log(request.params.bookID);
+    await Book.findByIdAndDelete(id);
+
+    response.status(200).send('Book Deleted');
+  } catch (error) {
+    next(error);
+  }
+}
 
 async function getBooks(request, response, next) {
   try {
@@ -36,5 +66,13 @@ async function getBooks(request, response, next) {
     next(error);
   }
 }
+
+app.get ('*', (request, response) => {
+  response.status(404).send('Not Available');
+});
+
+app.use((error, request, response, next) => {
+  response.status(500).send(error.message);
+});
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
