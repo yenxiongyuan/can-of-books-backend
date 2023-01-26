@@ -34,6 +34,24 @@ app.delete('/books/:bookID', deleteBooks);
 
 app.post('/books', postBooks);
 
+app.put('/books/:bookID', updateBooks);
+
+async function updateBooks(request, response, next) {
+  try {
+    let id = request.params.bookID;
+    let data = request.body;
+    let options = {new: true, overwrite: true};
+
+
+    const updateBooks = await Book.findByIdAndUpdate(id, data, options);
+
+    response.status(200).send(updateBooks);
+  } catch (error) {
+    next(error);
+  }
+
+}
+
 async function postBooks(request, response, next) {
   try {
     let createdBook = await Book.create(request.body);
